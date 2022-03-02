@@ -12,7 +12,7 @@ We extend these findings to show that manipulating visual concepts through langu
 代码（官方，只放出了VAE部分）：https://github.com/openai/dall-e  
 代码（pytorch版复现）：https://github.com/lucidrains/DALLE-pytorch  
 视频讲解：[Youtube Yannic Kilcher](https://www.youtube.com/watch?v=j4xgkjWlfL4)  
-Blog讲解: [GPT plus money (OpenAI CLIP，DALL-E)](https://nakaizura.blog.csdn.net/article/details/116903995)
+Blog讲解：[知乎](https://zhuanlan.zhihu.com/p/394467135)，[CSDN](https://nakaizura.blog.csdn.net/article/details/116903995)  
 
 ## 一句话总结
 [DALL·E](https://arxiv.org/pdf/2102.12092.pdf) [1] 是一种基于[GPT-3](https://arxiv.org/abs/2005.14165)的Text to Image生成器，其参数量高达12-billion.
@@ -33,7 +33,24 @@ Blog讲解: [GPT plus money (OpenAI CLIP，DALL-E)](https://nakaizura.blog.csdn.
 10. **Temporal Knowledge** 知晓某些合理的时间信息
 
 之前的一些Text to Image方法：Conditional GAN based [2], StackGAN [3] and StackGAN++ [4], AttnGAN [5], 增加额外监督信息的方法 [6, 7, 8], 基于采样的图像生成+预训练的多模态判别模型 [9, 10]  
-更多的论文整理：[CSDN](https://blog.csdn.net/qq_26136211/article/details/115206130)
+更多的论文整理：[2019-2021 Text To Image 论文整理](https://blog.csdn.net/qq_26136211/article/details/115206130)
+
+## 方法
+目标: 训练一个Transformer来自回归地将文本和图像tokens建模为单流（single stream）数据  
+问题:  
+1. 对于高分辨率图像来说，直接将像素作为图像tokens会占用大量内存  
+2. 似然目标函数倾向于优先考虑像素之间的短期依赖关系：大量的模型capacity消耗在捕捉高频细节信息，而不是低频的结构。而低频结构往往对我们从视觉上识别物体更重要  
+
+<div align=center><img src="https://user-images.githubusercontent.com/54792870/156366839-b2452b40-be07-437b-b9e6-392c08753a04.png" width="  "></div>
+
+
+解决方法：two-stage training procedure  
+**stage1** 训练一个dVAE将![](http://latex.codecogs.com/svg.latex?256\times256)的图像压缩到![](http://latex.codecogs.com/svg.latex?32\times32)个图像tokens，其中每个token映射成8192维的词表。这将trensformer的上下文尺寸（context size）减少了192倍（![](http://latex.codecogs.com/svg.latex?3\times256\times256\div32\div32)），不会对视觉质量造成很大的影响。  
+> dVAE: discrete Variational AutoEncoder, 离散变分自编码器，详情见原[paper](https://arxiv.org/pdf/2102.12092.pdf) P12，拓展：[VAE+VQVAE](https://zhuanlan.zhihu.com/p/388299884)
+
+**stage2** BPE Encoder编码得到的256个文本tokens和![](http://latex.codecogs.com/svg.latex?32\times32=1024)个图像tokens拼接，并训练自回归transformer来建模文本和图像tokens的联合分布。 
+> [BPE](https://zhuanlan.zhihu.com/p/86965595): Byte Pair Encoding, 字节对编码
+
 
 ## 补充
 [Transformer结构及其应用详解--GPT、BERT、MT-DNN、GPT-2](https://zhuanlan.zhihu.com/p/69290203) 知乎：Ph0en1x  
