@@ -1,5 +1,6 @@
 ## 已完成：
 [DALL-E](https://github.com/Rui-ZHAO-ipc/PaperRead/blob/main/Transformer/DALL%C2%B7E.md)
+[Neural Rendering for Game Character Auto-creation](https://github.com/Rui-ZHAO-ipc/PaperRead/blob/main/Others/Face-to-Parameter%20(F2P).md)
 
 ## 待完成：
 [CLIP](https://openai.com/blog/clip/)  
